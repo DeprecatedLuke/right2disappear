@@ -30,8 +30,8 @@ export interface ArchivedThread {
 const DEFAULTS: Omit<Config, "token"> = {
 	maxAgeDays: 30,
 	dryRun: false,
-	deleteDelayMs: 1200,
-	searchDelayMs: 3000,
+	deleteDelayMs: 1800,
+	searchDelayMs: 4000,
 	excludeGuilds: [],
 	excludeChannels: [],
 	includeGuilds: [],
