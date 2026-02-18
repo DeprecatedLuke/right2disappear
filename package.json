@@ -1,0 +1,23 @@
+{
+	"name": "right2disappear",
+	"version": "0.1.0",
+	"module": "src/index.ts",
+	"type": "module",
+	"license": "GPL-3.0",
+	"bin": {
+		"r2d": "src/index.ts"
+	},
+	"scripts": {
+		"start": "bun src/index.ts",
+		"build": "bun build --compile src/index.ts --outfile r2d",
+		"check": "biome check src/ && tsc -p tsconfig.json --noEmit",
+		"lint": "biome lint src/",
+		"fmt": "biome format --write src/",
+		"fix": "biome check --fix --unsafe src/"
+	},
+	"devDependencies": {
+		"@biomejs/biome": "^2.3.14",
+		"@types/bun": "latest",
+		"typescript": "^5.7.0"
+	}
+}

@@ -1,0 +1,23 @@
+* text=auto eol=lf
+
+*.png -text
+*.jpg -text
+*.jpeg -text
+*.gif -text
+*.webp -text
+*.ico -text
+*.pdf -text
+*.zip -text
+*.gz -text
+*.tar -text
+*.tgz -text
+*.7z -text
+*.db -text
+*.sqlite -text
+*.exe -text
+*.dll -text
+*.so -text
+*.dylib -text
+
+*.sh text eol=lf
+*.py text eol=lf
