@@ -166,20 +166,24 @@ export class DiscordAPI {
 		return this.#request("GET", `/guilds/${guildId}/channels`);
 	}
 
-	async searchGuild(guildId: string, authorId: string, maxId: string): Promise<SearchResult> {
+	async searchGuild(guildId: string, authorId: string, maxId: string, minId?: string): Promise<SearchResult> {
 		const params = new URLSearchParams({
 			author_id: authorId,
 			max_id: maxId,
+			sort_order: "asc",
 			include_nsfw: "true",
 		});
+		if (minId) params.set("min_id", minId);
 		return this.#request("GET", `/guilds/${guildId}/messages/search?${params}`);
 	}
 
-	async searchChannel(channelId: string, authorId: string, maxId: string): Promise<SearchResult> {
+	async searchChannel(channelId: string, authorId: string, maxId: string, minId?: string): Promise<SearchResult> {
 		const params = new URLSearchParams({
 			author_id: authorId,
 			max_id: maxId,
+			sort_order: "asc",
 		});
+		if (minId) params.set("min_id", minId);
 		return this.#request("GET", `/channels/${channelId}/messages/search?${params}`);
 	}
 

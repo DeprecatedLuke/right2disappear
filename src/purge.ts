@@ -47,6 +47,7 @@ async function purgeTarget(
 ): Promise<void> {
 	verbose(`scanning ${kind}: ${targetName} (${targetId})`);
 	let totalFound = 0;
+	let minId: string | undefined;
 	let round = 0;
 
 	while (true) {
@@ -56,8 +57,8 @@ async function purgeTarget(
 		try {
 			result =
 				kind === "guild"
-					? await api.searchGuild(targetId, authorId, maxId)
-					: await api.searchChannel(targetId, authorId, maxId);
+					? await api.searchGuild(targetId, authorId, maxId, minId)
+					: await api.searchChannel(targetId, authorId, maxId, minId);
 		} catch (e: unknown) {
 			if (e instanceof DiscordForbiddenError) {
 				verbose(`no access to ${kind} ${targetName}, skipping`);
@@ -98,9 +99,9 @@ async function purgeTarget(
 			// Use the oldest message ID from the raw results to paginate past them.
 			const allMsgs = result.messages.flat();
 			if (allMsgs.length > 0) {
-				const oldest = allMsgs.reduce((a, b) => (BigInt(a.id) < BigInt(b.id) ? a : b));
-				maxId = oldest.id;
-				verbose(`${kind} ${targetName}: page fully skipped, advancing past ${maxId}`);
+				const newest = allMsgs.reduce((a, b) => (BigInt(a.id) > BigInt(b.id) ? a : b));
+				minId = newest.id;
+				verbose(`${kind} ${targetName}: page fully skipped, advancing past ${minId}`);
 				await Bun.sleep(config.searchDelayMs);
 				continue;
 			}
@@ -160,8 +161,8 @@ async function purgeTarget(
 		// Advance cursor past processed messages when nothing was actually deleted
 		// (dry-run, all archived, all already gone) to avoid infinite loop
 		if (deletedThisBatch === 0 && hits.length > 0) {
-			const oldest = hits.reduce((a, b) => (BigInt(a.id) < BigInt(b.id) ? a : b));
-			maxId = (BigInt(oldest.id) - 1n).toString();
+			const newest = hits.reduce((a, b) => (BigInt(a.id) > BigInt(b.id) ? a : b));
+			minId = newest.id;
 		}
 		// Let search index catch up after deletions
 		await Bun.sleep(config.searchDelayMs);
@@ -193,7 +194,9 @@ export async function purge(api: DiscordAPI, config: Config): Promise<PurgeStats
 
 	const maxId = cutoffSnowflake(config.maxAgeDays);
 	const cutoffDate = new Date(Date.now() - config.maxAgeDays * 86_400_000).toISOString().slice(0, 10);
-	info(`target: messages before ${cutoffDate} (${config.maxAgeDays} days)${config.dryRun ? " [DRY RUN]" : ""}`);
+	info(
+		`target: messages older than ${config.maxAgeDays} days (before ${cutoffDate})${config.dryRun ? " [DRY RUN]" : ""}`,
+	);
 
 	if (config.skipChannels.length > 0) {
 		info(`skip channels matching: ${config.skipChannels.join(", ")}`);
